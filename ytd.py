@@ -1,16 +1,17 @@
+import os
 import tkinter as tk
 from pytube import YouTube
 from tkinter import filedialog
 from tkinter import ttk
+from PIL import Image, ImageTk
 
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("YouTube Video Converter")
+        self.default_directory = os.path.join(os.path.expanduser('~'), 'Downloads')  # Default directory
         self.initialize_ui()
-
-    
 
     def initialize_ui(self):
         self.configure_window()  
@@ -28,31 +29,66 @@ class App(tk.Tk):
         self.resizable(False,False)
         # background image
         image_path = "assset/background.png"
-        bg_image = tk.PhotoImage(file=image_path)
-        background_label = tk.Label(self, image=bg_image)
-        background_label.place(x=0, y=0, relwidth=1, relheight=1)
+        original_image = Image.open(image_path)
+        self.resized_image = original_image.resize((self.winfo_width(), self.winfo_height()))        
+        self.tk_image = ImageTk.PhotoImage(self.resized_image)
+
+        # self.background_label = tk.Label(self, image=self.tk_image)
+        # self.background_label.place(x=0, y=0, relwidth=1, relheight=1)
 
     def create_widgets(self):
-        self.url_label = tk.Label(self, text="Enter Youtube URL: ")
+        self.left_frame()
+        self.right_frame()
+
+    def left_frame(self):
+        self.left_frame = tk.Frame(self, bg='white')  # Set a white background color for the frame
+        self.left_frame.place(x=0, y=0, relwidth=0.6, relheight=1)
+        self.background_label = tk.Label(self.left_frame, image=self.tk_image)
+        self.background_label.place(x=0, y=0, relwidth=1.6, relheight=1)
+
+        self.url_frame()
+        self.dir_label_frame_()
+        self.download_label_frame_()
+
+    def url_frame(self):
+        self.url_widgets = tk.Frame(self.left_frame)
+        self.url_widgets.place(relx=0.2,rely=0.2)
+    
+        self.url_label = tk.Label(self.url_widgets, text="Enter Youtube URL: ")
         self.url_label.pack()
 
-        self.url_entry = tk.Entry(self, width=50)
+        self.url_entry = tk.Entry(self.url_widgets, width=50)
         self.url_entry.pack()
 
-        self.select_button = tk.Button(self, text="Select Save Directory", command=self.select_directory)
+    def dir_label_frame_(self):
+        self.dir_label_frame = tk.Frame(self.left_frame)
+        self.dir_label_frame.place(relx=0.2,rely=0.4)
+
+        self.select_button = tk.Button(self.dir_label_frame, text="Select Save Directory", command=self.select_directory)
         self.select_button.pack()
 
-        self.save_dir_label = tk.Label(self, text="")
+        self.save_dir_label = tk.Label(self.dir_label_frame, text="")
         self.save_dir_label.pack()
 
-        self.download_button = tk.Button(self, text="Download", command=self.download_video)
+    def download_label_frame_(self):
+        self.download_label_frame = tk.Frame(self.left_frame)
+        self.download_label_frame.place(relx=0.2,rely=0.6)
+
+        self.download_button = tk.Button(self.download_label_frame, text="Download", command=self.download_video)
         self.download_button.pack()
 
-        self.status_label = tk.Label(self, text="")
+        self.status_label = tk.Label(self.download_label_frame, text="")
         self.status_label.pack()
 
-        self.pb = ttk.Progressbar(self, orient='horizontal', length=200, mode='determinate')
+        self.pb = ttk.Progressbar(self.download_label_frame, orient='horizontal', length=200, mode='determinate')
         self.pb.pack()
+
+    def right_frame(self):
+        left_frame_width = int(self.winfo_width() * 0.6)
+        self.right_frame = tk.Frame(self, bg="red")
+        self.right_frame.place(x=left_frame_width, y=0, relwidth=0.401, relheight=1)
+        self.background_label = tk.Label(self.right_frame, image=self.tk_image)
+        self.background_label.place(x= -left_frame_width, y=0, relwidth=2.5, relheight=1,anchor='nw')
 
     def select_directory(self):
         directory = filedialog.askdirectory()
