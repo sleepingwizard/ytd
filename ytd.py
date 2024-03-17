@@ -1,5 +1,6 @@
 import os
 import tkinter as tk
+import pytube
 from pytube import YouTube
 from tkinter import filedialog
 from tkinter import ttk
@@ -67,7 +68,7 @@ class App(tk.Tk):
         self.select_button = tk.Button(self.dir_label_frame, text="Select Save Directory", command=self.select_directory)
         self.select_button.pack()
 
-        self.save_dir_label = tk.Label(self.dir_label_frame, text="")
+        self.save_dir_label = tk.Label(self.dir_label_frame, text=self.default_directory)
         self.save_dir_label.pack()
 
     def download_label_frame_(self):
@@ -92,20 +93,26 @@ class App(tk.Tk):
 
     def select_directory(self):
         directory = filedialog.askdirectory()
-        self.save_dir_label.config(text=directory)
+        if directory:
+            self.default_directory = directory
+            self.save_dir_label.config(text=directory)
         return directory
 
     def download_video(self):
         url = self.url_entry.get()
-        directory = self.save_dir_label.cget("text")
+        directory = self.default_directory  # Removed the parentheses
 
         if url and directory:
-            yt = YouTube(url, on_progress_callback=self.progress_callback)
-            video = yt.streams.get_highest_resolution()
-            video.download(directory)
-            self.status_label.config(text="Download successful!")
+            try:
+                yt = YouTube(url, on_progress_callback=self.progress_callback)
+                video = yt.streams.get_highest_resolution()
+                video.download(directory)
+                self.status_label.config(text="Download successful!")
+            except pytube.exceptions.AgeRestrictedError:
+                self.status_label.config(text="Video is age-restricted. Please log in to download.")
         else:
             self.status_label.config(text="Please provide both URL and save directory.")
+
 
     def progress_callback(self, stream, chunk, bytes_remaining):
         total_size = stream.filesize
@@ -117,4 +124,3 @@ class App(tk.Tk):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
-
