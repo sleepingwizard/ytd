@@ -12,6 +12,6 @@ To run
 ```
 python ytd.py
 ```
-
+pyinstaller --onefile -w -F --add-binary "my.ico;." my.py
 
 Enjoy your free downloads!!!

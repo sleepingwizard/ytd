@@ -1,0 +1,4 @@
+# Ignore log and temp files
+dependency/
+build/
+ytc.spec
