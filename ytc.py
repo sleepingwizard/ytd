@@ -17,10 +17,8 @@ class Ui_MainWindow(object):
         MainWindow.setFixedSize(919, 581)
         MainWindow.setMouseTracking(False)
         # MainWindow.setStyleSheet("background-color: #ffffff;")
-        
-
-
-
+        icon = QtGui.QIcon('asset/logo.png')
+        MainWindow.setWindowIcon(icon)
 
         # Create the central widget
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -155,6 +153,9 @@ class Ui_MainWindow(object):
         self.radioButton.setFont(font)
         self.radioButton.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.radioButton.setObjectName("radioButton")
+        self.radioButton.setChecked(True)
+        # self.radioButton.setEnabled(False)
+
         self.radioButton_2 = QtWidgets.QRadioButton(self.widget)
         self.radioButton_2.setGeometry(QtCore.QRect(180, 80, 161, 31))
         font = QtGui.QFont()
@@ -163,6 +164,8 @@ class Ui_MainWindow(object):
         self.radioButton_2.setFont(font)
         self.radioButton_2.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.radioButton_2.setObjectName("radioButton_2")
+        self.radioButton_2.setEnabled(False)
+
         self.label_4 = QtWidgets.QLabel(self.widget)
         self.label_4.setGeometry(QtCore.QRect(10, 20, 181, 51))
         font = QtGui.QFont()
@@ -193,6 +196,8 @@ class Ui_MainWindow(object):
         self.radioButton_4.setFont(font)
         self.radioButton_4.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.radioButton_4.setObjectName("radioButton_4")
+        self.radioButton_4.setChecked(True)
+
         self.label_7 = QtWidgets.QLabel(self.widget_5)
         self.label_7.setGeometry(QtCore.QRect(10, 0, 181, 41))
         font = QtGui.QFont()
@@ -203,22 +208,6 @@ class Ui_MainWindow(object):
         self.label_7.setFont(font)
         self.label_7.setCursor(QtGui.QCursor(QtCore.Qt.SizeFDiagCursor))
         self.label_7.setObjectName("label_7")
-        self.radioButton_5 = QtWidgets.QRadioButton(self.widget_5)
-        self.radioButton_5.setGeometry(QtCore.QRect(220, 100, 91, 31))
-        font = QtGui.QFont()
-        font.setFamily("MV Boli")
-        font.setPointSize(12)
-        self.radioButton_5.setFont(font)
-        self.radioButton_5.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.radioButton_5.setObjectName("radioButton_5")
-        self.radioButton_6 = QtWidgets.QRadioButton(self.widget_5)
-        self.radioButton_6.setGeometry(QtCore.QRect(30, 100, 91, 31))
-        font = QtGui.QFont()
-        font.setFamily("MV Boli")
-        font.setPointSize(12)
-        self.radioButton_6.setFont(font)
-        self.radioButton_6.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.radioButton_6.setObjectName("radioButton_6")
 
         # Set central widget
         MainWindow.setCentralWidget(self.centralwidget)
@@ -240,11 +229,9 @@ class Ui_MainWindow(object):
         self.radioButton.setText(_translate("MainWindow", "Video(.mp4)"))
         self.radioButton_2.setText(_translate("MainWindow", "Audio (.mp3)"))
         self.label_4.setText(_translate("MainWindow", "Convert To"))
-        self.radioButton_3.setText(_translate("MainWindow", "144p"))
-        self.radioButton_4.setText(_translate("MainWindow", "240p"))
+        self.radioButton_3.setText(_translate("MainWindow", "360p"))
+        self.radioButton_4.setText(_translate("MainWindow", "720p"))
         self.label_7.setText(_translate("MainWindow", "Quality"))
-        self.radioButton_5.setText(_translate("MainWindow", "180p"))
-        self.radioButton_6.setText(_translate("MainWindow", "720p"))
 
     def change_directory(self):
         directory = QFileDialog.getExistingDirectory(None, "Select Directory", self.directory, QFileDialog.ShowDirsOnly)
@@ -260,7 +247,6 @@ class Ui_MainWindow(object):
         
         # Split the text into separate lines, URLs, or by comma
         urls = re.split(r'[\n, ]+', text)
-        print (urls)
         
         if not urls:
             QMessageBox.warning(self.centralwidget, "Error", "Please enter valid YouTube video URL(s).")
@@ -273,46 +259,61 @@ class Ui_MainWindow(object):
             except OSError as e:
                 QMessageBox.critical(self.centralwidget, "Error", f"Failed to create download directory: {str(e)}")
                 return
+            
 
+        desired_resolution = self.get_selected_quality()
+        if desired_resolution is None:
+            QMessageBox.warning(self.centralwidget, "Error", "Please select resolution of YouTube video.")
+            return
+        
         # Download each video
         for url in urls:
             try:
                 yt = YouTube(url)
-                stream = yt.streams.get_highest_resolution()
-                # Get the quality of the video
-                quality = stream.resolution or "Unknown"
-                # Construct the file name with quality prefix
-                file_name = f"{quality}_{yt.title}.{stream.subtype}"
+                streams = yt.streams.filter(progressive=True)
+                # stream = yt.streams.get_highest_resolution()
+                stream = None
                 
-                stream.download(output_path=self.directory, filename=re.sub(r'[<>:"/\\|?*]', '_', file_name))
+                for s in streams:
+                    if s.resolution == desired_resolution:
+                        stream = s
+                        break
+                    
+                if stream is not None:
+                    # Get the quality of the video
+                    quality = stream.resolution or "Unknown"
+                    # Construct the file name with quality prefix
+                    file_name = f"{quality}_{yt.title}.{stream.subtype}"
+                    
+                    # Download the video
+                    stream.download(output_path=self.directory, filename=re.sub(r'[<>:"/\\|?*]', '_', file_name))
 
-                QMessageBox.information(self.centralwidget, "Download Complete", "Video downloaded successfully!")
+                    QMessageBox.information(self.centralwidget, "Download Complete", "Video downloaded successfully!")
+                else:
+                    QMessageBox.warning(self.centralwidget, "Resolution Not Available", f"Requested resolution '{desired_resolution}' not available for this video!")
             except Exception as e:
                 print(str(e))
                 QMessageBox.critical(self.centralwidget, "Error", f"An error occurred: {str(e)}")
 
-    def progress_hook(self, d):
-        if d['status'] == 'downloading':
-            # Update progress bar
-            progress = int(d['_percent_str'].strip('%'))
-            self.progressBar.setValue(progress)
+    # def progress_hook(self, d):
+    #     if d['status'] == 'downloading':
+    #         # Update progress bar
+    #         progress = int(d['_percent_str'].strip('%'))
+    #         self.progressBar.setValue(progress)
 
-        elif d['status'] == 'finished':
-            # Download completed
-            QMessageBox.information(self.centralwidget, "Download Complete", "Video downloaded successfully!")
+    #     elif d['status'] == 'finished':
+    #         # Download completed
+    #         QMessageBox.information(self.centralwidget, "Download Complete", "Video downloaded successfully!")
 
 
     def get_selected_quality(self):
         if self.radioButton_3.isChecked():
-            return 'bestvideo[height<=144]+bestaudio/best[height<=144]'
+            return '360p'
         elif self.radioButton_4.isChecked():
-            return 'bestvideo[height<=240]+bestaudio/best[height<=240]'
-        elif self.radioButton_5.isChecked():
-            return 'bestvideo[height<=720]+bestaudio/best[height<=720]'
-        elif self.radioButton_6.isChecked():
-            return 'bestvideo[height<=1080]+bestaudio/best[height<=1080]'
+            return '720p'
         else:
-            return 'best'
+            return None
+
 
 
 if __name__ == "__main__":
