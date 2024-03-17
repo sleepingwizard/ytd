@@ -7,7 +7,7 @@ import re
 from pytube import YouTube
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox, QFileDialog
-
+from PyQt5.QtGui import QPixmap
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -16,16 +16,25 @@ class Ui_MainWindow(object):
         MainWindow.setEnabled(True)
         MainWindow.setFixedSize(919, 581)
         MainWindow.setMouseTracking(False)
-        MainWindow.setStyleSheet("background-color: #ffffff;")
+        # MainWindow.setStyleSheet("background-color: #ffffff;")
+        
+
+
+
 
         # Create the central widget
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+        background_image = QPixmap("asset/bkk.png")
+        background_image = background_image.scaled(919, 581)
+        background_label = QtWidgets.QLabel(self.centralwidget)
+        background_label.setPixmap(background_image)
+        background_label.setGeometry(0, 0, 919, 581)  
 
         # Create the main frame
         self.frame = QtWidgets.QFrame(self.centralwidget)
         self.frame.setGeometry(QtCore.QRect(0, 0, 571, 581))
-        self.frame.setStyleSheet("background-color: #ff0000;")
+        # self.frame.setStyleSheet("background-color: #ff0000;")
         self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame.setObjectName("frame")
@@ -103,7 +112,7 @@ class Ui_MainWindow(object):
         self.frame_2 = QtWidgets.QFrame(self.centralwidget)
         self.frame_2.setGeometry(QtCore.QRect(570, 0, 351, 581))
         self.frame_2.setAutoFillBackground(False)
-        self.frame_2.setStyleSheet("background-color: #fff330;")
+        # self.frame_2.setStyleSheet("background-color: #fff330;")
         self.frame_2.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame_2.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_2.setObjectName("frame_2")
@@ -222,7 +231,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.label_5.setText(_translate("MainWindow", "Enter Youtube Video URL"))
-        self.pushButton.setText(_translate("MainWindow", "Change Directory"))
+        self.pushButton.setText(_translate("MainWindow", "Change"))
         self.label_6.setText(_translate("MainWindow", "Directory"))
         self.pushButton_2.setText(_translate("MainWindow", "Download"))
         self.label.setText(_translate("MainWindow", "YouTube"))
@@ -234,8 +243,8 @@ class Ui_MainWindow(object):
         self.radioButton_3.setText(_translate("MainWindow", "144p"))
         self.radioButton_4.setText(_translate("MainWindow", "240p"))
         self.label_7.setText(_translate("MainWindow", "Quality"))
-        self.radioButton_5.setText(_translate("MainWindow", "720p"))
-        self.radioButton_6.setText(_translate("MainWindow", "1080p"))
+        self.radioButton_5.setText(_translate("MainWindow", "180p"))
+        self.radioButton_6.setText(_translate("MainWindow", "720p"))
 
     def change_directory(self):
         directory = QFileDialog.getExistingDirectory(None, "Select Directory", self.directory, QFileDialog.ShowDirsOnly)

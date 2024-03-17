@@ -19,7 +19,7 @@ class App(tk.Tk):
         self.create_widgets()
 
     def configure_window(self):
-        self.iconbitmap("assset/logo.ico")
+        self.iconbitmap("asset/logo.ico")
         # Set the window size
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
@@ -29,7 +29,7 @@ class App(tk.Tk):
         self.geometry(window_size)
         self.resizable(False,False)
         # background image
-        image_path = "assset/background.png"
+        image_path = "asset/background.png"
         original_image = Image.open(image_path)
         self.resized_image = original_image.resize((self.winfo_width(), self.winfo_height()))        
         self.tk_image = ImageTk.PhotoImage(self.resized_image)
